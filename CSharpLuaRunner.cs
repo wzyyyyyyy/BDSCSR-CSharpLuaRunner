@@ -1,4 +1,4 @@
-﻿using CSR;
+using CSR;
 using KeraLua;
 using System;
 using System.Collections.Generic;
