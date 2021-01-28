@@ -8,7 +8,7 @@ namespace GUI
         private MCCSAPI api { get; set; }
         private JObject gui { get; set; }
         private JArray content { get; set; }
-        public GUIBuilder(MCCSAPI mcapi, string title) 
+        public GUIBuilder(MCCSAPI mcapi, string title)
         {
             this.api = mcapi;
             this.gui = new JObject();
@@ -21,7 +21,7 @@ namespace GUI
             gui.Add(new JProperty(nameof(title), title));
             content = new JArray();
         }
-        public void AddLabel(string text) 
+        public void AddLabel(string text)
         {
             content.Add(new JObject
             {
@@ -29,7 +29,7 @@ namespace GUI
                 new JProperty(nameof(text), text)
             });
         }
-        public void AddInput(string text,string placeholder = "")
+        public void AddInput(string text, string placeholder = "")
         {
             content.Add(new JObject
             {
@@ -39,7 +39,7 @@ namespace GUI
                 new JProperty("text",text)
             });
         }
-        public void AddToggle(string text, bool _default = false) 
+        public void AddToggle(string text, bool _default = false)
         {
             content.Add(new JObject
             {
@@ -60,7 +60,7 @@ namespace GUI
                 new JProperty(nameof(step),step)
             });
         }
-        public void AddStepSlider(string text, int _default, params string[] options) 
+        public void AddStepSlider(string text, int _default, params string[] options)
         {
             var t = new JArray();
             foreach (var i in options) t.Add(i);

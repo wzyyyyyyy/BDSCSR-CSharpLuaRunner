@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Forms;
@@ -39,12 +38,12 @@ namespace CSharpLuaRunner
                 return version;
             }
 
-            public void runcmd(string cmd)
+            public void runCmd(string cmd)
             {
                 api.runcmd(cmd);
             }
 
-            public void logout(string msg)
+            public void Log(string msg)
             {
                 api.logout(msg);
             }
@@ -189,7 +188,7 @@ namespace CSharpLuaRunner
                 api.reNameByUuid(uuid, name);
             }
 
-            public void runcmdAs(string uuid, string command)
+            public void runCmdAs(string uuid, string command)
             {
                 api.runcmdAs(uuid, command);
             }
@@ -253,10 +252,7 @@ namespace CSharpLuaRunner
             {
                 return (CsPlayer)ac;
             }
-        }
 
-        public class ToolFunc
-        {
             public void WriteAllText(string path, string contenst)
             {
                 File.WriteAllText(path, contenst);
@@ -484,7 +480,7 @@ namespace CSharpLuaRunner
             return retString;
         }
 
-        public static void RunCSharpLuaRunner(MCCSAPI api)
+        public static void RunCSharpLua(MCCSAPI api)
         {
             List<IntPtr> uuid = new List<IntPtr>();
             const String path = "./cslr";
@@ -495,19 +491,24 @@ namespace CSharpLuaRunner
             }
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("[INFO] [CSLR] CSharpLuaRunner加载中");
+            if (!File.Exists("./KeraLua.dll"))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("[IPYR] 无法找到依赖库 请将KeraLua.dll与Lua54.dll放到BDS根目录");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
             var LuaFun = new List<dynamic>();
             DirectoryInfo Allfolder = new DirectoryInfo(path);
             var mc = new MCLUAAPI(api);
             GC.KeepAlive(mc);
-            var tool = new ToolFunc();
-            GC.KeepAlive(tool);
             foreach (FileInfo file in Allfolder.GetFiles("*.cs.lua"))
             {
                 try
                 {
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.WriteLine("[INFO] [CSLR] 正在加载" + file.Name);
-                    //
+                    Lua lua = new Lua();
+                    lua.DoFile(file.FullName);
                     Console.WriteLine("[INFO] [CSLR] " + file.Name + "加载成功");
                 }
                 catch (Exception e)
@@ -556,7 +557,7 @@ namespace CSharpLuaRunner
 
                     if (sArray[1] == "help")
                     {
-                        Console.WriteLine("[INFO] [CSLR] help   使用帮助\n[INFO] [CSLR] info    CSLR信息\n[INFO] [CSLR] list  插件列表\n[INFO] [CSLR] reload  重载插件\n[INFO] [CSLR] unload  卸载插件");
+                        Console.WriteLine("[INFO] [CSLR] help   使用帮助\n[INFO] [CSLR] info    CSLR信息\n[INFO] [CSLR] list  插件列表\n[INFO] [CSLR] reload  重载插件");
                         return false;
                     }
 
@@ -581,23 +582,6 @@ namespace CSharpLuaRunner
                         return false;
                     }
 
-                    if (sArray[1] == "unload")
-                    {
-                        try
-                        {
-                            Console.WriteLine("[INFO] [CSLR] 正在卸载ID为" + sArray[2] + "的插件");
-                            //
-                            Console.WriteLine("[INFO] [CSLR] 已卸载ID为" + sArray[2] + "的插件");
-                            return false;
-                        }
-                        catch (Exception e)
-                        {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine("[ERROR] [CSLR] " + e.Message);
-                            Console.ForegroundColor = ConsoleColor.White;
-                        }
-                    }
-
                     if (sArray[1] == "reload")
                     {
                         LuaFun.Clear();
@@ -609,7 +593,8 @@ namespace CSharpLuaRunner
                             {
                                 Console.ForegroundColor = ConsoleColor.White;
                                 Console.WriteLine("[INFO] [CSLR] 正在加载" + file.Name);
-                                //
+                                Lua lua = new Lua();
+                                lua.DoFile(file.FullName);
                                 Console.WriteLine("[INFO] [CSLR] " + file.Name + "加载成功");
                             }
                             catch (Exception e)
@@ -642,7 +627,7 @@ namespace CSharpLuaRunner
                 var a = BaseEvent.getFrom(x) as EquippedArmorEvent;
                 CallLuaFunc(LuaFun, func =>
                 {
-                    string list = "{\'playername\':\'" + a.playername + "\',\'itemid\':\'" + a.itemid + "\',\'itemname\':\'" + a.itemname + "\',\'itemcount\':\'" + a.itemcount + "\',\'itemaux\':\'" + a.itemaux + "\',\'slot\':\'" + a.slot + "\',\'XYZ\':[" + Convert.ToInt32(a.XYZ.x) + "," + Convert.ToInt32(a.XYZ.y) + "," + Convert.ToInt32(a.XYZ.z) + "]}";
+                    string list = "{\'playername\':\'" + a.playername + "\',\'itemid\':\'" + a.itemid + "\',\'itemname\':\'" + a.itemname + "\',\'itemcount\':\'" + a.itemcount + "\',\'itemaux\':\'" + a.itemaux + "\',\'slot\':\'" + a.slot + "\',\'Pos\':[" + Convert.ToInt32(a.XYZ.x) + "," + Convert.ToInt32(a.XYZ.y) + "," + Convert.ToInt32(a.XYZ.z) + "]}";
                     var re = func.equippedarm(list);
                 });
                 return true;
@@ -654,7 +639,7 @@ namespace CSharpLuaRunner
                 var re = true;
                 CallLuaFunc(LuaFun, func =>
                 {
-                    string list = "{\'actorname\':\'" + a.actorname + "\',\'dimensionid\':\'" + a.dimensionid + "\',\'playername\':\'" + a.playername + "\',\'XYZ\':[" + Convert.ToInt32(a.XYZ.x) + "," + Convert.ToInt32(a.XYZ.y) + "," + Convert.ToInt32(a.XYZ.z) + "]}";
+                    string list = "{\'actorname\':\'" + a.actorname + "\',\'dimensionid\':\'" + a.dimensionid + "\',\'playername\':\'" + a.playername + "\',\'Pos\':[" + Convert.ToInt32(a.XYZ.x) + "," + Convert.ToInt32(a.XYZ.y) + "," + Convert.ToInt32(a.XYZ.z) + "]}";
                     re = func.attack(list);
                 });
                 return re;
@@ -675,7 +660,7 @@ namespace CSharpLuaRunner
             {
                 var a = BaseEvent.getFrom(x) as DestroyBlockEvent;
                 var re = true;
-                string list = "{\'blockid\':\'" + a.blockid + "\',\'uuid\':\'" + CsGetUuid(uuid, a.playername, api) + "\',\'position\':[" + Convert.ToInt32(a.position.x) + "," + Convert.ToInt32(a.position.y) + "," + Convert.ToInt32(a.position.z) + "],\'blockname\':\'" + a.blockname + "\',\'dimensionid\':\'" + a.dimensionid + "\',\'playername\':\'" + a.playername + "\',\'XYZ\':[" + Convert.ToInt32(a.XYZ.x) + "," + Convert.ToInt32(a.XYZ.y) + "," + Convert.ToInt32(a.XYZ.z) + "]}";
+                string list = "{\'blockid\':\'" + a.blockid + "\',\'uuid\':\'" + CsGetUuid(uuid, a.playername, api) + "\',\'position\':[" + Convert.ToInt32(a.position.x) + "," + Convert.ToInt32(a.position.y) + "," + Convert.ToInt32(a.position.z) + "],\'blockname\':\'" + a.blockname + "\',\'dimensionid\':\'" + a.dimensionid + "\',\'playername\':\'" + a.playername + "\',\'Pos\':[" + Convert.ToInt32(a.XYZ.x) + "," + Convert.ToInt32(a.XYZ.y) + "," + Convert.ToInt32(a.XYZ.z) + "]}";
                 CallLuaFunc(LuaFun, func =>
                 {
                     re = func.destroyblock(list);
@@ -849,9 +834,16 @@ namespace CSR
     {
         public static void onStart(MCCSAPI api)
         {
-            csapi.api = api;
-            CSharpLuaRunner.CSharpLuaRunner.RunCSharpLuaRunner(api);
-            Console.WriteLine("[INFO] [CSLR] CSharpLuaRunner加载成功\n[INFO] [CSLR] 输入cslr help查看帮助");
+            try
+            {
+                csapi.api = api;
+                CSharpLuaRunner.CSharpLuaRunner.RunCSharpLua(api);
+                Console.WriteLine("[INFO] [CSLR] CSharpLuaRunner加载成功\n[INFO] [CSLR] 输入cslr help查看帮助");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[ERROR] [CSLR] " + e.Message);
+            }
         }
     }
 

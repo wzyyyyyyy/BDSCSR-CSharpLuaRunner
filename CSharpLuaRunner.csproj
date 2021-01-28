@@ -68,11 +68,9 @@
     <Compile Include="BDS\Plugin.cs" />
     <Compile Include="CSharpLuaRunner.cs" />
     <Compile Include="GUI.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DynamicLanguageRuntime">
-      <Version>1.3.0</Version>
-    </PackageReference>
     <PackageReference Include="KeraLua">
       <Version>1.2.11</Version>
     </PackageReference>
@@ -95,8 +93,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
