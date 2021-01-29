@@ -1,5 +1,5 @@
 using CSR;
-using KeraLua;
+using NLua;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,7 +15,7 @@ namespace CSharpLuaRunner
         public static Dictionary<string, IntPtr> ptr = new Dictionary<string, IntPtr>();
         public static Dictionary<string, string> ShareDatas = new Dictionary<string, string>();
         public static Dictionary<string, object> ObjectDatas = new Dictionary<string, object>();
-        public static string version = "0.0.1";
+        public static string version = "1.0.0";
         public static string localip = "127.0.0.1";
 
         public class MCLUAAPI
@@ -487,14 +487,14 @@ namespace CSharpLuaRunner
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
-                Console.WriteLine("[INFO] [CSLR] 已创建文件夹");
+                Console.WriteLine("[INFO] [CSLR] 已创建文件夹\n[INFO] [CSLR] 输入cslr help查看帮助");
             }
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("[INFO] [CSLR] CSharpLuaRunner加载中");
-            if (!File.Exists("./KeraLua.dll"))
+            if (!File.Exists("./NLua.dll"))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[IPYR] 无法找到依赖库 请将KeraLua.dll与Lua54.dll放到BDS根目录");
+                Console.WriteLine("[IPYR] 无法找到依赖库 请将NLua.dll、KeraLua.dll与Lua54.dll放到BDS根目录");
                 Console.ForegroundColor = ConsoleColor.White;
             }
             var LuaFun = new List<dynamic>();
@@ -508,6 +508,7 @@ namespace CSharpLuaRunner
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.WriteLine("[INFO] [CSLR] 正在加载" + file.Name);
                     Lua lua = new Lua();
+                    lua.RegisterFunction("mc", null, typeof(CSharpLuaRunner).GetMethod("mc"));
                     lua.DoFile(file.FullName);
                     Console.WriteLine("[INFO] [CSLR] " + file.Name + "加载成功");
                 }
@@ -557,14 +558,14 @@ namespace CSharpLuaRunner
 
                     if (sArray[1] == "help")
                     {
-                        Console.WriteLine("[INFO] [CSLR] help   使用帮助\n[INFO] [CSLR] info    CSLR信息\n[INFO] [CSLR] list  插件列表\n[INFO] [CSLR] reload  重载插件");
+                        Console.WriteLine("[INFO] [CSLR]\n - help    使用帮助\n - info    CSLR信息\n - list    插件列表\n - reload  重载插件");
                         return false;
                     }
 
                     if (sArray[1] == "info")
                     {
-                        MessageBox.Show("感谢使用CSharpLuaRunner\n作者:SeaIceNX", "当前版本" + version, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        Console.Write("[INFO] [CSLR] 窗体关闭 控制台已恢复");
+                        MessageBox.Show("感谢使用CSharpLuaRunner\n作者: SeaIceNX 海冰宁兴\n当前版本: " + version, "CSharpLuaRunner", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        Console.Write("[INFO] [CSLR] 窗体关闭 控制台已恢复\n");
                         return false;
                     }
 
@@ -572,13 +573,12 @@ namespace CSharpLuaRunner
                     {
                         DirectoryInfo folder = new DirectoryInfo(path);
                         int total = 0;
-                        Console.WriteLine("[INFO] [CSLR] 正在读取插件列表");
                         foreach (FileInfo file in Allfolder.GetFiles("*.cs.lua"))
                         {
-                            Console.WriteLine(" - " + file.Name + " | ID: " + total);
+                            Console.WriteLine(" - " + file.Name);
                             total += 1;
                         }
-                        Console.WriteLine($"[INFO] [CSLR]共加载了{total}个插件");
+                        Console.WriteLine($"[INFO] [CSLR] 共加载了{total}个插件");
                         return false;
                     }
 
@@ -594,6 +594,7 @@ namespace CSharpLuaRunner
                                 Console.ForegroundColor = ConsoleColor.White;
                                 Console.WriteLine("[INFO] [CSLR] 正在加载" + file.Name);
                                 Lua lua = new Lua();
+                                lua.RegisterFunction("mc", null, typeof(CSharpLuaRunner).GetMethod("mc"));
                                 lua.DoFile(file.FullName);
                                 Console.WriteLine("[INFO] [CSLR] " + file.Name + "加载成功");
                             }
@@ -838,7 +839,7 @@ namespace CSR
             {
                 csapi.api = api;
                 CSharpLuaRunner.CSharpLuaRunner.RunCSharpLua(api);
-                Console.WriteLine("[INFO] [CSLR] CSharpLuaRunner加载成功\n[INFO] [CSLR] 输入cslr help查看帮助");
+                Console.WriteLine("[INFO] [CSLR] CSharpLuaRunner加载成功");
             }
             catch (Exception e)
             {
